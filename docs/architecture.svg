@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#44546F"/>
+    </marker>
+    <style>
+      .box{rx:14;ry:14;stroke-width:1.5}
+      .t{font-size:17px;font-weight:700;fill:#172B4D}
+      .s{font-size:13px;fill:#44546F}
+      .h{font-size:13px;font-weight:700;letter-spacing:.08em;fill:#626F86}
+      .ln{stroke:#44546F;stroke-width:1.6;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="720" fill="#F7F8F9"/>
+  <text x="40" y="52" font-size="28" font-weight="800" fill="#172B4D">Decision Memory — architecture</text>
+  <text x="40" y="80" class="s">Forge app · site-level install across Jira + Confluence · one shared Forge SQL store · $0 to run</text>
+
+  <!-- capture -->
+  <text x="40" y="128" class="h">CAPTURE</text>
+  <rect class="box" x="40" y="140" width="250" height="78" fill="#E9F2FF" stroke="#1868DB"/>
+  <text x="58" y="172" class="t">Jira comments</text><text x="58" y="196" class="s">“Decision: …” · /decision blocks</text>
+  <rect class="box" x="40" y="232" width="250" height="78" fill="#E9F2FF" stroke="#1868DB"/>
+  <text x="58" y="264" class="t">Confluence pages</text><text x="58" y="288" class="s">page action · ADR import · macro</text>
+  <rect class="box" x="40" y="324" width="250" height="78" fill="#E9F2FF" stroke="#1868DB"/>
+  <text x="58" y="356" class="t">Rovo agent</text><text x="58" y="380" class="s">“record the decisions on this page”</text>
+  <rect class="box" x="40" y="416" width="250" height="78" fill="#E9F2FF" stroke="#1868DB"/>
+  <text x="58" y="448" class="t">IDE via MCP</text><text x="58" y="472" class="s">Claude Code · Cursor · VS Code</text>
+
+  <!-- core -->
+  <rect class="box" x="400" y="150" width="400" height="340" fill="#FFFFFF" stroke="#172B4D"/>
+  <text x="420" y="184" class="h">FORGE FUNCTIONS (NODE 22)</text>
+  <text x="420" y="218" class="t">Decision service</text>
+  <text x="420" y="240" class="s">validation · visibility (project-scoped) · owner/admin rules</text>
+  <rect x="420" y="258" width="360" height="104" rx="10" fill="#FFF7D6" stroke="#B38600"/>
+  <text x="436" y="286" class="t">Conflict engine (no paid AI)</text>
+  <text x="436" y="308" class="s">guardrails: avoid / prefer + scopes</text>
+  <text x="436" y="328" class="s">intent: “add X” vs “migrate off X” · aliases</text>
+  <text x="436" y="348" class="s">BM25 relevance · evidence snippets</text>
+  <rect x="420" y="378" width="170" height="92" rx="10" fill="#DCFFF1" stroke="#1F845A"/>
+  <text x="436" y="408" class="t">Forge SQL</text><text x="436" y="430" class="s">decisions · alerts</text><text x="436" y="450" class="s">settings</text>
+  <rect x="606" y="378" width="174" height="92" rx="10" fill="#F3F0FF" stroke="#6E5DC6"/>
+  <text x="620" y="408" class="t">Triggers</text><text x="620" y="430" class="s">issue · comment · daily</text><text x="620" y="450" class="s">review reminders</text>
+
+  <!-- outputs -->
+  <text x="910" y="128" class="h">ACT</text>
+  <rect class="box" x="910" y="140" width="250" height="78" fill="#FFECEB" stroke="#C9372C"/>
+  <text x="928" y="172" class="t">Conflict alerts</text><text x="928" y="196" class="s">comment · label · issue panel</text>
+  <rect class="box" x="910" y="232" width="250" height="78" fill="#FFECEB" stroke="#C9372C"/>
+  <text x="928" y="264" class="t">Decision Log</text><text x="928" y="288" class="s">search · lineage · insights</text>
+  <rect class="box" x="910" y="324" width="250" height="78" fill="#FFECEB" stroke="#C9372C"/>
+  <text x="928" y="356" class="t">Answers with “why”</text><text x="928" y="380" class="s">Rovo chat · other agents · MCP</text>
+  <rect class="box" x="910" y="416" width="250" height="78" fill="#F3F0FF" stroke="#6E5DC6"/>
+  <text x="928" y="448" class="t">Teamwork Graph</text><text x="928" y="472" class="s">publish decisions · owner's teams</text>
+
+  <path class="ln" d="M290 179 C340 179 350 250 398 260"/>
+  <path class="ln" d="M290 271 C340 271 350 290 398 300"/>
+  <path class="ln" d="M290 363 C340 363 350 340 398 340"/>
+  <path class="ln" d="M290 455 C340 455 350 390 398 380"/>
+  <path class="ln" d="M800 260 C850 260 860 179 908 179"/>
+  <path class="ln" d="M800 300 C850 300 860 271 908 271"/>
+  <path class="ln" d="M800 340 C850 340 860 363 908 363"/>
+  <path class="ln" d="M800 420 C850 420 860 455 908 455"/>
+
+  <!-- footer -->
+  <rect class="box" x="40" y="540" width="1120" height="140" fill="#FFFFFF" stroke="#DCDFE4"/>
+  <text x="64" y="578" class="h">SECURITY &amp; COST</text>
+  <text x="64" y="608" class="s">• Reads run as the user (asUser) — Jira/Confluence enforce permissions. Project-scoped decisions only visible to project members.</text>
+  <text x="64" y="632" class="s">• Restricted comments and issues with security levels are never captured. Only owners or Jira admins can change decisions.</text>
+  <text x="64" y="656" class="s">• No external egress, no remote backend, no secrets. Runs inside the Forge free allowance; Rovo credits are not billed to the developer.</text>
+</svg>
