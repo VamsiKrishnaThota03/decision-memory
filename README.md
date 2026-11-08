@@ -1,100 +1,258 @@
+<div align="center">
+
+<img src="static/icons/decision-memory.svg" alt="Decision Memory logo" width="88" height="88" />
+
 # Decision Memory
 
-**Your team already decided. Decision Memory makes sure nobody forgets.**
+### Your team already decided. Decision Memory makes sure nobody forgets.
 
-A Forge app for Jira + Rovo that captures team decisions where they happen (Jira comments, the issue panel, Rovo chat, any MCP client), and **flags new work that contradicts them** with the evidence, the reasoning and the person who owns the decision.
+Capture decisions where they happen in **Jira**, **Confluence**, **Rovo** and your **IDE**,<br/>
+then catch new work that contradicts them, *before* it gets built.
 
-| Surface | What it does |
+[![Built on Forge](https://img.shields.io/badge/Built%20on-Atlassian%20Forge-0052CC?logo=atlassian&logoColor=white)](https://developer.atlassian.com/platform/forge/)
+[![Rovo Agent](https://img.shields.io/badge/Rovo-Agent%20%2B%20Actions-6554C0)](#-rovo-agent-mcp-and-teamwork-graph)
+[![MCP](https://img.shields.io/badge/MCP-server-111827)](docs/MCP.md)
+[![Teamwork Graph](https://img.shields.io/badge/Teamwork%20Graph-connector-8F7EE7)](#-rovo-agent-mcp-and-teamwork-graph)
+[![Tests](https://img.shields.io/badge/tests-47%20passing-1F845A)](#-development)
+[![Cost](https://img.shields.io/badge/cost%20to%20run-%240-22A06B)](#-cost-0)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+
+**[How it works](#-how-it-works)** · **[Features](#-features)** · **[Architecture](#-architecture)** · **[Security](#-security--privacy)** · **[Quick start](#-quick-start)**
+
+<sub>Built for <b>Atlassian Codegeist 2026</b> · Apps for Software Teams</sub>
+
+</div>
+
+---
+
+## 🧠 The problem
+
+> *"Wait, didn't we decide **not** to use MongoDB?"*
+
+Every team makes decisions: *Postgres over Mongo*, *no Friday deploys*, *deprecate Jenkins*. They end up in comment threads, meeting notes and people's heads. Months later someone builds the opposite, and nobody notices until code review, or until the incident.
+
+Teams lose sprints to work they already ruled out, have the same argument again in review, and ship things that break rules nobody could find.
+
+## ✨ The solution
+
+Decision Memory gives your organisation a **memory that speaks up**.
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 1️⃣ Capture
+Write `Decision: …` in any Jira comment, use the `/decision` block, capture a Confluence page, import ADRs, or ask Rovo. **No new process.**
+
+</td>
+<td width="33%" valign="top">
+
+### 2️⃣ Guard
+Each decision becomes checkable **guardrails**: what to *avoid* and what to *prefer*, with optional scopes like *"(in payments service)"*.
+
+</td>
+<td width="33%" valign="top">
+
+### 3️⃣ Catch
+New issues, comments, proposals and diffs are checked automatically. A conflict gets **one clear comment** with the evidence, the reason, and the owner.
+
+</td>
+</tr>
+</table>
+
+### See it in action
+
+Someone comments on `KAN-1`:
+
+> **Decision:** Use PostgreSQL instead of MongoDB for all new services.
+
+A week later, a teammate creates `KAN-2 · Add MongoDB cluster for recommendations service`. Seconds later:
+
+> ⚠️ **Decision Memory: this work may conflict with a team decision**
+>
+> **DEC-1** · *Use PostgreSQL instead of MongoDB for all new services* (high confidence)<br/>
+> Mentions "mongodb", which DEC-1 rules out.<br/>
+> Evidence: *"add mongodb cluster for recommendations service"*<br/>
+> Why it was decided: *one database to operate, transactional guarantees…*<br/>
+> Decision owner: **@Vamsi Krishna**
+
+It also **understands intent**:
+
+| New work | Result |
 |---|---|
-| **Automatic capture** | Write `Decision: …` in a Jira comment, or use the native `/decision` block, and it's recorded with owner, source link and guardrails. |
-| **Conflict alerts** | When an issue is created or its summary/description changes, it is checked against every active decision. Conflicts get **one** explanatory comment and a `decision-conflict` label. |
-| **Issue panel** | Conflicts with evidence, decisions this issue *implements*, related decisions, acknowledge/dismiss, and "record a decision" with a live guardrail preview. |
-| **Decision Log** (Jira global page) | Searchable log with stats, detail view (rationale, owner's teams via Teamwork Graph, lineage), supersede/revoke, and "Check a proposal" for PR/RFC text. |
-| **Rovo agent** | "Why do we use Postgres?", "Does this issue conflict with anything?", "Record the decisions on this Confluence page". |
-| **Rovo actions** | `search-decisions`, `get-decision`, `check-conflicts`, `record-decision`, `supersede-decision`, `list-due-for-review` are reusable tools other agents can call. |
-| **MCP server** (`rovo:mcp`) | The same tools in Claude Code, Cursor, VS Code: "check my plan against team decisions before I code". |
-| **Teamwork Graph connector** | Publishes every site-wide decision into the Teamwork Graph as a document linked to its Jira issue, and reads the owner's teams back, so Rovo search and other agents can find decisions and see who stands behind them. |
-| **Confluence** | Page ⋯ → *Capture decisions* turns decision blocks, "Decision:" lines and ADR pages into decisions. A *Decision Log* macro embeds them on any page. Same installation and database as Jira. |
-| **ADR import** | Paste Markdown ADRs (Nygard or MADR); superseded ADRs are imported as history. |
-| **Insights** | Conflicts caught per month, alert precision, most-protective decisions, and hygiene (missing rationale or guardrails, overdue reviews). |
-| **Admin settings** | Auto-comment on or off, minimum confidence, label, comment drift checks, review reminders, and dismissal quieting. |
-| **Learning loop** | Decisions whose alerts keep being dismissed are quieted to high confidence only and flagged for guardrail tuning. |
-| **Review reminders** | A daily job reminds owners on the source issue when a decision passes its review date. |
+| `Add MongoDB cluster for recommendations` | 🔴 **Conflict** with DEC-1 |
+| `Replace PostgreSQL with Mongo` | 🔴 **Conflict** (the work moves *towards* the avoided tech) |
+| `Migrate orders service off MongoDB to Postgres` | 🟢 **Implements** DEC-1 |
+| `Deploy hotfix to production on Friday` | 🔴 **Conflict** with *"Do not deploy on Fridays"* |
+| `Deploy hotfix to production on Tuesday` | ✅ No conflict |
+| `Add feature flags to onboarding` | ✅ No conflict (DEC is scoped to *payments*) |
 
-## How it works
+---
 
+## 🚀 Features
+
+### In Jira
+| | |
+|---|---|
+| 💬 **Comment capture** | `Decision: …` lines and native `/decision` blocks become decisions, with owner, source link and guardrails. |
+| 🚨 **Conflict alerts** | On issue create or edit, and on new comments (drift like *"let's just use Mongo here"*): one comment plus a `decision-conflict` label, never spam. |
+| 🧩 **Issue panel** | Conflicts with evidence, decisions this issue *implements*, related decisions, acknowledge or dismiss, and **Record a decision** with a live guardrail preview. |
+| 📚 **Decision Log** | Search, status filters, stats, and a detail view with rationale, owner's teams, history chain (DEC-1 → DEC-7), and supersede, revoke or edit guardrails. |
+| 🔎 **Check a proposal** | Paste an RFC or PR description to test it against every active decision. |
+| 📥 **ADR import** | Paste Markdown ADRs (Nygard or MADR); superseded ones are kept as history and proposed ones wait until accepted. |
+| 📊 **Insights** | Conflicts caught per month, alert precision, most-protective decisions, and decision hygiene. |
+| ⚙️ **Admin settings** | Auto-comment, minimum confidence, labels, comment checks, review reminders, dismissal quieting. |
+| ⏰ **Review reminders** | A daily job pings owners when a decision passes its review date. |
+| 🎓 **Learning loop** | Decisions whose alerts keep getting dismissed go quiet (high confidence only) and are flagged for tuning. |
+
+### In Confluence
+| | |
+|---|---|
+| 📄 **Capture decisions** | Page **⋯** menu: decision blocks, `Decision:` lines and ADR pages become decisions you pick from a checklist. |
+| 🗂️ **Decision Log macro** | Embed the team's current decisions on any page. |
+
+Jira and Confluence share **one installation and one database**, so a decision captured in Confluence protects Jira work immediately.
+
+### 🤖 Rovo agent, MCP and Teamwork Graph
+| | |
+|---|---|
+| 🤖 **Rovo agent** | *"Why do we use Postgres?"*, *"Does this issue conflict with anything?"*, *"Record the decisions on this page."* Every answer cites **DEC-n** with its source. |
+| 🛠️ **6 reusable actions** | `search-decisions` · `get-decision` · `check-conflicts` · `record-decision` · `supersede-decision` · `list-due-for-review`, usable by **any** Rovo agent. |
+| 🔌 **MCP server** | The same tools in **Claude Code, Cursor and VS Code**. `check-conflicts` accepts a **git diff** and inspects what you add to `package.json`, Dockerfiles, Terraform and CI config. [Setup →](docs/MCP.md) |
+| 🕸️ **Teamwork Graph, both ways** | **Publishes** site-wide decisions into the graph as documents linked to their Jira issues (`graph:connector`), and **reads** each owner's teams back. |
+
+---
+
+## 🔬 How it works
+
+```mermaid
+flowchart LR
+  subgraph Capture
+    A[Jira comment<br/>Decision: …]
+    B[Confluence page]
+    C[Rovo chat]
+    D[IDE via MCP]
+  end
+  subgraph Forge["Forge functions"]
+    S[Decision service<br/>validation · visibility · ownership]
+    E{{Conflict engine<br/>guardrails · intent · BM25}}
+    DB[(Forge SQL)]
+  end
+  subgraph Act
+    X[Jira comment + label]
+    Y[Issue panel & Decision Log]
+    Z[Rovo / MCP answers]
+    G[Teamwork Graph]
+  end
+  A & B & C & D --> S --> DB
+  T[Issue / comment<br/>triggers] --> E
+  DB --> E
+  E --> X & Y & Z
+  S --> G
 ```
-Jira comment / panel / Rovo / MCP ──► record ──► Forge SQL (decisions + guardrails)
-                                                     │
-Issue created/updated ──► conflict engine ◄──────────┘
-   (trigger)              BM25 relevance + guardrail matching + intent detection
-                              │
-               ┌──────────────┼───────────────────────┐
-         Jira comment     Issue panel         Rovo / MCP answer
-         + label          (ack / dismiss)     (cites DEC-n + evidence)
-```
 
-**Conflict engine (`src/lib/conflicts.js`).** Each decision is stored with *guardrails*: things to **avoid** and to **prefer**. They're extracted from the statement ("Use PostgreSQL **instead of** MongoDB" gives prefer `postgresql`, avoid `mongodb`), shown live while you type, and can be edited.
+**The conflict engine** (`src/lib/conflicts.js`) is deterministic, explainable and free:
 
-New work is checked like this:
+1. **Guardrail extraction.** *"Use PostgreSQL **instead of** MongoDB"* gives prefer `postgresql`, avoid `mongodb`. *"Do not deploy on Fridays"* gives avoid `deploy (on fridays)`. Reasons ("because…") are ignored, and passive phrasing ("must not be used") is handled.
+2. **Intent detection, per clause.** It looks at the verb that governs each match. *add / use / migrate **to*** means a conflict; *remove / migrate **off** / replace X **with** Y* means aligned. Negation never carries across a comma or "but".
+3. **Aliases.** `pg` = `postgres` = `postgresql`, `mongo` = `mongodb`, `k8s` = `kubernetes`, and more. `Node.js` and `C++` are kept intact.
+4. **BM25 relevance** finds related decisions and raises confidence.
+5. **Evidence.** Every finding quotes the exact snippet that triggered it.
 
-1. **Guardrail hit + intent.** "Add a MongoDB cluster" is a **conflict**. "Migrate off MongoDB" moves away from the avoided term, so it's **aligned** (it *implements* the decision).
-2. **BM25 ranking** across title, statement, rationale and tags finds **related** decisions and raises conflict confidence.
-3. Every finding includes the matched term and a text snippet, so it's explainable and never a black box.
+No paid LLM, vector database or external service. Rovo adds natural-language reasoning on top.
 
-The engine is deterministic and runs inside the Forge function. It needs no paid LLM, vector database or external service, so automatic checks cost nothing beyond the Forge free allowance. Rovo adds natural-language reasoning on top.
+---
 
-## Security and privacy
+## 🏗️ Architecture
 
-- **Visibility model.** A decision captured from a comment is scoped to its project, and only users who can browse that project see it in search, the Decision Log, Rovo or MCP. Decisions recorded through the panel, Rovo or MCP are site-wide by default, with an opt-in project-only scope.
-- **Restricted content is never captured.** Comments with role or group visibility, and issues behind a security level, are skipped.
-- **Every user-facing read runs as the user.** `asUser()` makes Jira enforce permissions. App-authored comments only reference decisions that are site-wide or from the same project.
-- **Authorisation never trusts inputs.** The account ID comes from the platform context. Only the owner or a Jira admin can supersede or revoke a decision.
-- **Input validation.** Lengths are capped, links must be https, dates are strict, and all SQL uses prepared statements.
-- **No loops.** Triggers use `ignoreSelf`, ignore comments written by apps, and a unique `(issue, decision)` key means one alert per issue per decision.
-- **Fail-safe integrations.** Teamwork Graph and reminder failures are logged and never break the core flow.
-- **No egress.** The app makes no external network calls, has no remote backend, and needs no secrets.
+<p align="center"><img src="docs/architecture.svg" alt="Decision Memory architecture" width="100%"/></p>
 
-## Cost: $0
+| Forge module | Used for |
+|---|---|
+| `rovo:agent`, `action` ×6, `rovo:mcp` | Agent, reusable tools, MCP server |
+| `jira:issuePanel`, `jira:globalPage`, `jira:adminPage` | Issue panel, Decision Log, settings |
+| `confluence:contentAction`, `macro` | Capture from pages, embedded log |
+| `graph:connector` + Teamwork Graph API | Publish decisions, read owners' teams |
+| `trigger`, `scheduledTrigger` | Issue and comment events, lifecycle, daily reminders |
+| `sql` | Decisions, alerts, settings (with migrations) |
+| `app.compatibility` | One site-level install across Jira + Confluence |
 
-Everything runs on Forge-hosted compute and Forge SQL, well inside the free monthly allowances (200k GB-s compute, 1 SQL compute-hour, 1 GB logs). Rovo credits are not billed to the developer. The function memory is set to 256 MB to stretch the allowance further.
+---
 
-## Setup
+## 🔐 Security & privacy
 
-Requirements: Node 22+, a free Atlassian developer site with Rovo enabled (<http://go.atlassian.com/cloud-dev>).
+- 👤 **Reads run as the user** (`asUser`), so Jira and Confluence enforce permissions.
+- 🔒 **Project-scoped visibility.** Decisions captured from comments are visible only to people who can browse that project, in search, Rovo, MCP and the macro.
+- 🚫 **Restricted content is never captured.** That covers role- or group-restricted comments and issues behind security levels.
+- 🪪 **Identity comes only from the platform.** It's never taken from inputs. Only owners or Jira admins can change a decision, and only admins can change settings.
+- 🧾 **The server re-parses every import.** Clients send which drafts to import, not their content.
+- 🔁 **No loops or spam.** `ignoreSelf` triggers, bot-comment filtering, and one alert per (issue, decision).
+- 🌐 **No egress, no secrets, no remote backend.** The app [Runs on Atlassian](https://go.atlassian.com/runs-on-atlassian). See the [privacy policy](docs/PRIVACY.md).
+
+## 💸 Cost: $0
+
+All compute and storage stays inside Forge's free monthly allowances. Rovo credits aren't billed to the developer. Forge LLM was deliberately **not** used, because it has no free tier.
+
+---
+
+## ⚡ Quick start
+
+**You need:** Node 22+ and a free Atlassian developer site with Rovo (<http://go.atlassian.com/cloud-dev>).
 
 ```bash
 npm install -g @forge/cli
-forge login                    # uses an Atlassian API token
-forge register                 # writes your app id into manifest.yml
+forge login                     # Atlassian API token
+forge register                  # writes your app id into manifest.yml
 npm install
-npm test                       # 45 unit tests for the engine
-forge lint
 forge deploy -e development
-forge install -e development --product jira --site <your-site>.atlassian.net
-forge install -e development --product confluence --site <your-site>.atlassian.net   # same installation, shared data
+forge install -e development --product jira       --site <site>.atlassian.net
+forge install -e development --product confluence --site <site>.atlassian.net   # same install, shared data
 ```
 
-Diagram: `docs/architecture.svg`. MCP: `docs/MCP.md`. Marketplace: `docs/MARKETPLACE.md`. Privacy: `docs/PRIVACY.md`.
+Then open **Apps → Decision Log → Load 5 sample decisions**, and create an issue called *"Add MongoDB cluster for recommendations"*. 🎉
 
-**MCP clients (optional).** An admin enables the app's tools under *Atlassian Administration → Apps → Sites → Connected apps*. Then:
+<details>
+<summary><b>Connect the Teamwork Graph</b></summary>
+
+Go to *Atlassian Administration → Apps → Sites → Connected apps → Decision Memory → Connections → Connect*. All site-wide decisions are backfilled and kept in sync. Reading owners' teams uses a Preview API that may require Atlassian to allowlist the app; until then that field shows *not available*.
+</details>
+
+<details>
+<summary><b>Use it from Claude Code / Cursor (MCP)</b></summary>
 
 ```bash
-claude mcp add --transport http decision-memory https://mcp.atlassian.com/forge/<app-uuid>
+claude mcp add --transport http decision-memory https://mcp.atlassian.com/forge/<app-id>
+```
+An admin must first enable the app's tools under *Connected apps*. More prompts are in [docs/MCP.md](docs/MCP.md).
+</details>
+
+## 🧪 Development
+
+```bash
+npm test          # 47 node:test cases: guardrails, intent, aliases, ADRs, diffs, validation
+forge lint
+forge logs -e development --since 15m
 ```
 
-**Teamwork Graph.** An admin connects the connector under *Atlassian Administration → Apps → Sites → Connected apps → Decision Memory → Connections*. All site-wide decisions are then backfilled and kept in sync. Reading an owner's teams uses the Teamwork Graph API (Preview), which may require Atlassian to allowlist the app. Until then that field shows *not available*.
-
-## Project layout
-
 ```
-manifest.yml                 modules: rovo:agent, rovo:mcp, action×6, issuePanel, globalPage, triggers, sql
-prompts/agent.md             Rovo agent instructions
-src/lib/                     pure logic (unit tested): text, bm25, guardrails, conflicts, adf, validate
-src/db/                      Forge SQL schema + repositories
-src/services/                business rules, Jira, permissions/visibility, Teamwork Graph
-src/handlers/                thin adapters: Rovo/MCP actions, UI resolvers, triggers
-src/frontend/                UI Kit: issue panel, Decision Log
-test/                        node:test suites
-docs/                        submission text + demo script
+manifest.yml            all Forge modules
+prompts/agent.md        Rovo agent instructions
+src/lib/                pure, unit-tested logic: text · bm25 · guardrails · conflicts · adf · adr · diff · validate
+src/db/                 Forge SQL schema, migrations, repositories
+src/services/           business rules · Jira · visibility · Confluence · Teamwork Graph
+src/handlers/           thin adapters: Rovo/MCP actions · UI resolvers · triggers
+src/frontend/           UI Kit: issue panel · Decision Log · admin · Confluence
+test/                   test suites
+docs/                   architecture · submission · demo script · MCP · privacy · Marketplace
 ```
+
+## 🗺️ Roadmap
+
+- [ ] Companion Bitbucket app with merge checks. Forge doesn't allow workspace and site scopes in one app.
+- [ ] Richer graph relationships (decision → team → repository)
+- [ ] Per-project policies: "required" decisions that block workflow transitions
+- [ ] Slack and Teams digests of new and superseded decisions
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 Vamsi Krishna Thota
