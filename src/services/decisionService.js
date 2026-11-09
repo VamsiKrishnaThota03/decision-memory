@@ -40,9 +40,9 @@ async function assertCanManage(decision, accountId) {
 }
 
 export async function loadDecision(idOrKey) {
-  const id = repo.parseDecisionId(idOrKey);
-  if (!id) throw new ValidationError('Use a decision key like DEC-12.');
-  return assertCanSee(await repo.getDecision(id));
+  const num = repo.parseDecisionNumber(idOrKey);
+  if (!num) throw new ValidationError('Use a decision key like DEC-12.');
+  return assertCanSee(await repo.getDecisionByNumber(num));
 }
 
 /** Summarise a decision for agents / MCP clients (compact, no internal fields). */
@@ -58,7 +58,7 @@ export function summarize(d, extra = {}) {
     scope: d.projectKey ? `project ${d.projectKey}` : 'site-wide',
     decidedOn: d.createdAt?.slice(0, 10),
     reviewBy: d.reviewBy || undefined,
-    supersededBy: d.supersededBy ? repo.decisionKey(d.supersededBy) : undefined,
+    supersededBy: d.supersededByKey ?? undefined,
     guardrails: { avoid: d.avoidTerms, prefer: d.preferTerms },
     ...extra,
   };
@@ -415,9 +415,9 @@ export async function importDecisions(markdown, ids, { accountId, sourceUrl = nu
     if (created && (raw.status === 'superseded' || raw.status === 'revoked')) {
       final = await repo.setStatus(decision.id, raw.status, { reason: 'Imported as historical record' });
     }
-    out.push({ ok: true, created, key: final.key, title: final.title, status: final.status });
+    out.push({ ok: true, created, id: final.id, key: final.key, title: final.title, status: final.status });
   }
-  const createdIds = out.filter((r) => r.ok && r.created).map((r) => repo.parseDecisionId(r.key));
+  const createdIds = out.filter((r) => r.ok && r.created).map((r) => r.id);
   await syncDecisions(await repo.getDecisionsByIds(createdIds));
   return out;
 }

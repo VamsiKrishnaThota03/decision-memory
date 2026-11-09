@@ -1,4 +1,4 @@
-import { migrationRunner } from '@forge/sql';
+import { migrationRunner, sql } from '@forge/sql';
 
 /**
  * Forge SQL schema. Every statement is idempotent and migrations are append-only:
@@ -62,6 +62,9 @@ const MIGRATIONS = [
   ],
   ['v004_decisions_last_reminded', 'ALTER TABLE decisions ADD COLUMN IF NOT EXISTS last_reminded_at TIMESTAMP NULL'],
   ['v005_alerts_created_index', 'CREATE INDEX IF NOT EXISTS idx_alerts_created ON decision_alerts (created_at)'],
+  // Human-facing sequential number (DEC-1, DEC-2…). TiDB AUTO_INCREMENT ids are not consecutive.
+  ['v006_decisions_num', 'ALTER TABLE decisions ADD COLUMN IF NOT EXISTS num BIGINT NULL'],
+  ['v007_decisions_num_unique', 'CREATE UNIQUE INDEX IF NOT EXISTS uq_decisions_num ON decisions (num)'],
 ];
 
 let ready = null;
@@ -70,6 +73,34 @@ async function runMigrations() {
   let runner = migrationRunner;
   for (const [name, ddl] of MIGRATIONS) runner = runner.enqueue(name, ddl);
   await runner.run();
+  await backfillNumbers();
+}
+
+/** Give every decision without a number the next sequential one (oldest first). Idempotent. */
+async function backfillNumbers() {
+  const r = await sql.prepare('SELECT id FROM decisions WHERE num IS NULL ORDER BY id ASC LIMIT 5000').execute();
+  for (const row of r.rows) await assignNumber(Number(row.id));
+}
+
+/**
+ * Assign MAX(num)+1 to a decision. The unique index makes concurrent assignment safe:
+ * a collision fails and is retried with a fresh MAX.
+ */
+export async function assignNumber(id) {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      await sql
+        .prepare(
+          `UPDATE decisions SET num = (SELECT next_num FROM (SELECT COALESCE(MAX(num), 0) + 1 AS next_num FROM decisions) AS t)
+           WHERE id = ? AND num IS NULL`,
+        )
+        .bindParams(id)
+        .execute();
+      return;
+    } catch (err) {
+      if (attempt === 5) throw err;
+    }
+  }
 }
 
 /**

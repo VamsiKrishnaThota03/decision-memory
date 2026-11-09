@@ -201,7 +201,7 @@ export function search(query, decisions, { limit = 8, includeInactive = false } 
     .search(query, { limit })
     .map((r) => ({ decision: byId.get(r.id), score: Number(r.score.toFixed(2)), matched: r.matched }));
   if (keyMatch) {
-    const exact = pool.find((d) => String(d.id) === keyMatch[1]);
+    const exact = pool.find((d) => d.key.toUpperCase() === `DEC-${keyMatch[1]}`);
     if (exact && !results.some((r) => r.decision.id === exact.id)) {
       results.unshift({ decision: exact, score: 99, matched: [`dec-${exact.id}`] });
     }

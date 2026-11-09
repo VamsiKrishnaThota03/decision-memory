@@ -1,10 +1,10 @@
 import { sql } from '@forge/sql';
-import { ensureSchema } from './schema.js';
+import { assignNumber, ensureSchema } from './schema.js';
 
 export const STATUSES = ['active', 'superseded', 'revoked'];
 export const SOURCE_TYPES = ['jira-comment', 'jira-issue', 'confluence', 'rovo', 'manual', 'mcp'];
 
-const COLUMNS = `id, title, statement, rationale, status, owner_account_id, created_by, source_type,
+const COLUMNS = `id, num, (SELECT s.num FROM decisions s WHERE s.id = decisions.superseded_by) AS superseded_by_num, title, statement, rationale, status, owner_account_id, created_by, source_type,
   source_url, source_ref, issue_key, project_key, tags, avoid_terms, prefer_terms, superseded_by,
   status_reason, review_by, created_at, updated_at`;
 
@@ -37,8 +37,8 @@ const toIso = (v) => {
 
 export const decisionKey = (id) => `DEC-${id}`;
 
-/** Accepts "DEC-12", "dec-12", "12" or 12. Returns a positive integer or null. */
-export function parseDecisionId(value) {
+/** Accepts "DEC-12", "dec-12", "12" or 12. Returns the decision NUMBER (not the internal id) or null. */
+export function parseDecisionNumber(value) {
   const m = String(value ?? '').trim().match(/^(?:DEC-)?(\d{1,15})$/i);
   return m ? Number(m[1]) : null;
 }
@@ -46,9 +46,11 @@ export function parseDecisionId(value) {
 export function toDomain(row) {
   if (!row) return null;
   const id = Number(row.id);
+  const number = row.num != null ? Number(row.num) : null;
   return {
     id,
-    key: decisionKey(id),
+    number,
+    key: decisionKey(number ?? id),
     title: row.title,
     statement: row.statement,
     rationale: row.rationale ?? '',
@@ -64,6 +66,7 @@ export function toDomain(row) {
     avoidTerms: parseJsonArray(row.avoid_terms),
     preferTerms: parseJsonArray(row.prefer_terms),
     supersededBy: row.superseded_by != null ? Number(row.superseded_by) : null,
+    supersededByKey: row.superseded_by_num != null ? decisionKey(Number(row.superseded_by_num)) : null,
     statusReason: row.status_reason ?? null,
     reviewBy: toIsoDate(row.review_by),
     createdAt: toIso(row.created_at),
@@ -105,12 +108,19 @@ export async function insertDecision(d) {
     )
     .execute();
   const id = Number(result.rows.insertId);
+  await assignNumber(id);
   return { decision: await getDecision(id), created: true };
 }
 
 export async function getDecision(id) {
   await ensureSchema();
   const r = await sql.prepare(`SELECT ${COLUMNS} FROM decisions WHERE id = ?`).bindParams(id).execute();
+  return toDomain(r.rows[0]);
+}
+
+export async function getDecisionByNumber(num) {
+  await ensureSchema();
+  const r = await sql.prepare(`SELECT ${COLUMNS} FROM decisions WHERE num = ?`).bindParams(num).execute();
   return toDomain(r.rows[0]);
 }
 
