@@ -1,5 +1,9 @@
 # Devpost submission: Decision Memory
 
+**Demo video:** https://www.youtube.com/watch?v=txTaT7M3AVI
+**Install link:** https://developer.atlassian.com/console/install/5f7d5a1f-7d63-4e37-80ee-a2e55c108c9f?signature=AYABeMXnrrnH%2FmYekJnnvSNfdnIAAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4CxqLTo9l4lqXuFjNim1xJM%2Bp%2F3TVP9xHS2BrU5DRRucBvgMpLvz6bXlqDg5UXtFRIwAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDENsxSO1xuxNLeruEgIBEIA7UY9drqNIDiAKFflI3j0D19S1QWco1oU1AMpH00JB6RA9DUPQ1LR6E9fzDP6TGSCTyLectVyvmPpOeMsAB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHi9bVMAkme4qVQX1fQHo6ePw3H40A7cGfz7yrmSfBWMXgHMqQrGsaU6M9x7SEy4o3vSAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM0NQLj%2F0TekHB1helAgEQgDshn1Ys%2FCbOLJCGySJvG%2B1UgN%2BZ%2B3ZwIALFchu94ArWfrPCKXMUBprF2ZEFRa3QWAZUETpWJznkvBPbcgAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeDYASx0XCjkny4iLV6vz%2BKtEGSGT6kdt0QRpkn6D%2FlVEAV0%2BqYCGy23B8ioBXx02lDwAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAxY0U6qQ4gaZraKJ6QCARCAO1PRaoian7%2BZzvskjFoiHVgOLqd3%2FtcF9DfCRoWZ3%2F9wbzcXfrIzZotnNVSu3QPyF0rwnFNU0jHk5%2BUqAgAAAAAMAAAQAAAAAAAAAAAAAAAAAHrVTVuGMNGwR%2B55QjL5MYf%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADIcfzYg3IUCds%2BewVK0dc2zmDZfBH00JYSWlLWio5WCOixEUHIc3bxoSQEBdieppQoSb9tyBhHzXfMblIYki4znhhE%3D&product=jira&product=confluence
+**Code:** https://github.com/VamsiKrishnaThota03/decision-memory
+
 **Category:** Apps for Software Teams
 **Bonus prizes:** Best Rovo Agent · Best app with Atlassian MCP · Best Teamwork Graph integration (· Best Marketplace app, if listed)
 
@@ -48,7 +52,7 @@ Every team has decisions that live only in someone's head or in a comment thread
 
 ## Testing instructions for judges
 0. Fastest path: open **Apps → Decision Log** and click **Load 5 sample decisions**, then jump to step 4.
-1. Open the installation link: `<PASTE forge install link>` and install the app on your Jira site with Rovo enabled.
+1. Open the **Install link** above and install the app on your Jira site (Confluence connects automatically).
 2. In any project, create issue **A** and comment:
    `Decision: Use PostgreSQL instead of MongoDB for all new services.`
    A green confirmation comment appears with `DEC-1`.
