@@ -36,7 +36,7 @@ import { DetailModal } from './log/DetailModal.jsx';
 import { ImportTab } from './log/ImportTab.jsx';
 import { InsightsTab } from './log/InsightsTab.jsx';
 
-const tabPanelStyle = xcss({ paddingBlock: 'space.200' });
+const tabPanelStyle = xcss({ paddingBlock: 'space.200', width: '100%' });
 
 const STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
@@ -82,8 +82,8 @@ function DecisionsTab({ refreshKey, onChanged }) {
 
   const head = {
     cells: [
-      { key: 'key', content: 'Key', width: 8 },
-      { key: 'title', content: 'Decision', width: 42 },
+      { key: 'key', content: 'Key', width: 9 },
+      { key: 'title', content: 'Decision', width: 41 },
       { key: 'status', content: 'Status', width: 12 },
       { key: 'owner', content: 'Owner', width: 16 },
       { key: 'scope', content: 'Scope', width: 10 },
@@ -93,7 +93,7 @@ function DecisionsTab({ refreshKey, onChanged }) {
   const rows = (data ?? []).map((d) => ({
     key: String(d.id),
     cells: [
-      { key: 'key', content: <Strong>{d.key}</Strong> },
+      { key: 'key', content: <Lozenge isBold>{d.key}</Lozenge> },
       {
         key: 'title',
         content: (
@@ -275,13 +275,11 @@ function App() {
   const bump = () => setRefreshKey((k) => k + 1);
   const stats = useResolver('getStats', {}, [refreshKey]);
   const s = stats.data ?? {};
-  const isEmpty = stats.data && !s.active && !s.superseded && !s.revoked;
+  const isEmpty = stats.data && !s.active;
   return (
     <Stack space="space.300">
-      <Stack space="space.100">
-        <Heading size="large">Decision Log</Heading>
-        <Text>What your team decided, why, and whether new work still follows it.</Text>
-      </Stack>
+      {/* Jira already renders the page title ("Decision Log") above the app. */}
+      <Text>What your team decided, why, and whether new work still follows it.</Text>
       <ErrorBanner error={stats.error} onRetry={stats.reload} />
       {isEmpty ? <Onboarding onSeeded={bump} /> : null}
       <Inline space="space.150" shouldWrap>
